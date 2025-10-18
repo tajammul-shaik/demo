@@ -17,13 +17,16 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                    echo "Stopping any existing Spring Boot app..."
+                    echo "Stopping any existing instance..."
                     pkill -f 'demo-0.0.1-SNAPSHOT.jar' || true
 
-                    echo "Starting new Spring Boot app..."
+                    echo "Starting application in background..."
                     nohup java -jar target/demo-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+
+                    echo "Waiting 5 seconds for startup..."
                     sleep 5
-                    echo "App deployed successfully!"
+                    echo "Checking if app is running..."
+                    pgrep -f 'demo-0.0.1-SNAPSHOT.jar' && echo "App started successfully!" || echo "App failed to start!"
                 '''
             }
         }
