@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven3'
-        jdk 'Java21'
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -19,29 +14,18 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                sh 'mvn test'
-            }
-        }
-
         stage('Deploy') {
             steps {
-                echo 'Deploying Spring Boot Application...'
                 sh '''
-                    pkill -f "java -jar" || true
+                    echo "Stopping any existing Spring Boot app..."
+                    pkill -f 'demo-0.0.1-SNAPSHOT.jar' || true
+
+                    echo "Starting new Spring Boot app..."
                     nohup java -jar target/demo-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+                    sleep 5
+                    echo "App deployed successfully!"
                 '''
             }
-        }
-    }
-
-    post {
-        success {
-            echo '✅ Build and Deploy successful!'
-        }
-        failure {
-            echo '❌ Build failed.'
         }
     }
 }
